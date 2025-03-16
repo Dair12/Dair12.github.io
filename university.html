@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о ВУЗе</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script>
+        async function loadUniversity() {
+            const params = new URLSearchParams(window.location.search);
+            const universityId = params.get("id");
+
+            if (!universityId) {
+                document.getElementById("universityInfo").innerHTML = "<p>Ошибка: ВУЗ не найден</p>";
+                return;
+            }
+
+            try {
+                // Загружаем название ВУЗа
+                let responseUni = await fetch(`https://dair3.pythonanywhere.com/get_universities`);
+                let universities = await responseUni.json();
+                let university = universities.find(u => u.id == universityId);
+                
+                if (!university) {
+                    document.getElementById("universityName").textContent = "ВУЗ не найден";
+                    return;
+                }
+                document.getElementById("universityName").textContent = university.name;
+
+                // Загружаем предметы
+                let responseSubjects = await fetch(`https://dair3.pythonanywhere.com/get_subjects/${universityId}`);
+                let subjects = await responseSubjects.json();
+                let subjectsList = document.getElementById("subjectsList");
+                subjectsList.innerHTML = "";
+
+                if (subjects.length === 0) {
+                    subjectsList.innerHTML = "<li>Нет предметов</li>";
+                } else {
+                    subjects.forEach(subject => {
+                        let li = document.createElement("li");
+                        li.textContent = `${subject.name}: проходной балл ${subject.threshold}`;
+                        subjectsList.appendChild(li);
+                    });
+                }
+            } catch (error) {
+                document.getElementById("universityInfo").innerHTML = "<p>Ошибка загрузки данных</p>";
+                console.error("Ошибка:", error);
+            }
+        }
+
+        window.onload = loadUniversity;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2 id="universityName">Загрузка...</h2>
+        <h3>Предметы:</h3>
+        <ul id="subjectsList"><li>Загрузка...</li></ul>
+        <button onclick="location.href='main.html'">Назад</button>
+    </div>
+</body>
+</html>

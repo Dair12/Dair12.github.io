@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список ВУЗов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f4f4;
+            position: relative;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .add-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .add-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script>
+        async function loadUniversities() {
+            try {
+                let response = await fetch("https://dair3.pythonanywhere.com/get_universities");
+                let data = await response.json();
+                let list = document.getElementById("universitiesList");
+                list.innerHTML = "";
+                data.forEach(university => {
+                    let li = document.createElement("li");
+                    li.textContent = university.name;
+                    li.style.cursor = "pointer"; // Делаем кликабельным
+                    li.onclick = () => location.href = `university.html?id=${university.id}`; // Переход на страницу ВУЗа
+                    list.appendChild(li);
+                });
+            } catch (error) {
+                console.error("Ошибка загрузки данных:", error);
+                document.getElementById("errorMessage").textContent = "Не удалось загрузить данные.";
+            }
+        }
+        window.onload = loadUniversities;
+    </script>
+</head>
+<body>
+    <button class="add-button" onclick="location.href='add_university.html'">+</button>
+    <div class="container">
+        <h2>Список ВУЗов</h2>
+        <ul id="universitiesList">
+            <li>Загрузка...</li>
+        </ul>
+        <button onclick="location.href='index.html'">Назад</button>
+    </div>
+</body>
+</html>

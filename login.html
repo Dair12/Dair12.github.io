@@ -47,7 +47,43 @@
             <input type="password" id="loginPassword" placeholder="Пароль" required>
             <button type="submit">Войти</button>
         </form>
+        <p id="message"></p>
         <button onclick="location.href='register.html'">Зарегистрироваться</button>
     </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            let name = document.getElementById("loginName").value;
+            let password = document.getElementById("loginPassword").value;
+            let messageElement = document.getElementById("message");
+
+            try {
+                let response = await fetch(`https://dair3.pythonanywhere.com/get_password/${name}`);
+                let result = await response.json();
+
+                if (response.ok) {
+                    if (result.password === password) {
+                        messageElement.style.color = "green";
+                        messageElement.textContent = "Вход выполнен успешно! Перенаправление...";
+                        setTimeout(() => {
+                            window.location.href = "main.html"; 
+                        }, 2000);
+                    } else {
+                        messageElement.style.color = "red";
+                        messageElement.textContent = "Неверное имя или пароль";
+                    }
+                } else {
+                    messageElement.style.color = "red";
+                    messageElement.textContent = result.error || "Ошибка входа";
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+                messageElement.style.color = "red";
+                messageElement.textContent = "Ошибка сервера, попробуйте позже.";
+            }
+        });
+    </script>
 </body>
 </html>

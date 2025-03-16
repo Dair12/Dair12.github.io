@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить ВУЗ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .subjects-container {
+            margin-top: 10px;
+            text-align: left;
+        }
+        .subject-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .subject-entry input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .remove-button {
+            width: 30px;
+            height: 30px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .remove-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+    <script>
+        function addSubjectField() {
+            let container = document.getElementById("subjectsContainer");
+            let div = document.createElement("div");
+            div.classList.add("subject-entry");
+
+            let nameInput = document.createElement("input");
+            nameInput.type = "text";
+            nameInput.placeholder = "Название предмета";
+            nameInput.required = true;
+
+            let thresholdInput = document.createElement("input");
+            thresholdInput.type = "number";
+            thresholdInput.placeholder = "Проходной балл";
+            thresholdInput.required = true;
+
+            let removeButton = document.createElement("button");
+            removeButton.textContent = "✖";
+            removeButton.classList.add("remove-button");
+            removeButton.onclick = () => div.remove();
+
+            div.appendChild(nameInput);
+            div.appendChild(thresholdInput);
+            div.appendChild(removeButton);
+            container.appendChild(div);
+        }
+
+        async function submitUniversity() {
+            let universityName = document.getElementById("universityName").value;
+            if (!universityName) {
+                alert("Введите название ВУЗа");
+                return;
+            }
+
+            let subjects = [];
+            document.querySelectorAll(".subject-entry").forEach(entry => {
+                let name = entry.children[0].value;
+                let threshold = entry.children[1].value;
+                if (name && threshold) {
+                    subjects.push({ "name": name, "threshold": parseInt(threshold) });
+                }
+            });
+
+            let payload = { name: universityName, subjects: subjects };
+            try {
+                let response = await fetch("https://dair3.pythonanywhere.com/add_university", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                let result = await response.json();
+                if (response.ok) {
+                    alert("ВУЗ успешно добавлен!");
+                    window.location.href = "main.html";
+                } else {
+                    alert("Ошибка: " + result.error);
+                }
+            } catch (error) {
+                alert("Ошибка сети: " + error.message);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Добавить ВУЗ</h2>
+        <input type="text" id="universityName" placeholder="Название ВУЗа" required>
+        <h3>Предметы</h3>
+        <div id="subjectsContainer" class="subjects-container"></div>
+        <button onclick="addSubjectField()">Добавить предмет</button>
+        <button onclick="submitUniversity()">Сохранить</button>
+        <button onclick="location.href='main.html'">Назад</button>
+    </div>
+</body>
+</html>

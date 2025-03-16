@@ -47,7 +47,39 @@
             <input type="password" id="registerPassword" placeholder="Пароль" required>
             <button type="submit">Зарегистрироваться</button>
         </form>
+        <p id="message"></p>
         <button onclick="location.href='login.html'">Уже есть аккаунт? Войти</button>
     </div>
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            let name = document.getElementById("registerName").value;
+            let password = document.getElementById("registerPassword").value;
+
+            let response = await fetch("https://dair3.pythonanywhere.com/add_student", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name, password })
+            });
+
+            let result = await response.json();
+            let messageElement = document.getElementById("message");
+
+            if (response.ok) {
+                messageElement.style.color = "green";
+                messageElement.textContent = "Регистрация успешна! Перенаправление...";
+                setTimeout(() => {
+                    window.location.href = "login.html"; 
+                }, 2000);
+            } else {
+                messageElement.style.color = "red";
+                messageElement.textContent = result.error || "Ошибка регистрации";
+            }
+        });
+    </script>
 </body>
 </html>
